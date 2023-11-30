@@ -1,68 +1,62 @@
 import numpy as np
+from scipy.stats import mode
 
-class EntityProcessor:
-    """
-    A class for processing and analyzing entities with key-value characteristics.
-    """
-
-    def __init__(self):
+class Entity:
+    def __init__(self, entity_id, field_value_pairs):
         """
-        Initialize an EntityProcessor instance.
-        """
-        self.entities = {}
-
-    def entity(self, entity_id, characteristics):
-        """
-        Process an individual entity and store its characteristics.
+        Initialize an Entity instance.
 
         Parameters:
         - entity_id (str): The ID or label of the entity.
-        - characteristics (dict): Key-value pairs representing the characteristics of the entity.
+        - field_value_pairs (dict): Key-value pairs representing the characteristics of the entity.
         """
-        if entity_id not in self.entities:
-            self.entities[entity_id] = {}
+        self.entity_id = entity_id
+        self.field_value_pairs = self.validate_and_convert(field_value_pairs)
 
-        for key, value in characteristics.items():
-            self.entities[entity_id][key] = value
-
-    def entity_collection(self, entity_processor, entity_id):
+    def validate_and_convert(self, field_value_pairs):
         """
-        Process an entity and add its values to the entity collection.
+        Validate and convert values to a common numeric type if they are not already.
 
         Parameters:
-        - entity_processor (EntityProcessor): An instance of EntityProcessor containing entity data.
-        - entity_id (str): The ID or label of the entity to process.
-        """
-        entity_data = entity_processor.get_entity(entity_id)
-
-        if entity_data:
-            for key, value in entity_data.items():
-                if key not in self.entities:
-                    self.entities[key] = []
-
-                # Convert values to a common numeric type if they are not already
-                if isinstance(value, (int, float, np.number)):
-                    self.entities[key].append(value)
-                elif isinstance(value, str) and value.isnumeric():
-                    self.entities[key].append(float(value))
-                else:
-                    print(f"Skipping value for key '{key}' as it is not numeric.")
-
-    def get_entity(self, entity_id):
-        """
-        Retrieve the characteristics of a specific entity.
-
-        Parameters:
-        - entity_id (str): The ID or label of the entity to retrieve.
+        - field_value_pairs (dict): Key-value pairs representing the characteristics of the entity.
 
         Returns:
-        - dict or None: A dictionary containing the characteristics of the entity, or None if not found.
+        - dict: Validated key-value pairs.
         """
-        return self.entities.get(entity_id, None)
+        validated_pairs = {}
+        for field, value in field_value_pairs.items():
+            try:
+                validated_value = float(value)
+            except (ValueError, TypeError):
+                print(f"Skipping value for field '{field}' in entity '{self.entity_id}' as it is not numeric.")
+                continue
+            validated_pairs[field] = validated_value
+        return validated_pairs
 
-    def compute_basic_statistics(self, key):
+class EntityCollection:
+    def __init__(self, items=None):
         """
-        Compute the mean of the values associated with a specific key in the entity collection.
+        Initialize an EntityCollection instance.
+
+        Parameters:
+        - items (list): List of Entity instances (optional).
+        """
+        self.items = items or []
+
+    def add(self, entity_id, field_values):
+        """
+        Add an entity to the collection.
+
+        Parameters:
+        - entity_id (str): The ID or label of the entity.
+        - field_values (dict): Key-value pairs representing the characteristics of the entity.
+        """
+        new_entity = Entity(entity_id, field_values)
+        self.items.append(new_entity)
+
+    def compute_mean(self, key):
+        """
+        Compute the mean of the values associated with a specific key across all entities.
 
         Parameters:
         - key (str): The key for which to compute the mean.
@@ -70,20 +64,83 @@ class EntityProcessor:
         Returns:
         - float or None: The mean of the values associated with the key, or None if no values are found.
         """
-        values = self.entities.get(key, [])
+        values = self._get_values_for_key(key)
+        return np.mean(values) if values else None
 
-        if values:
-            mymean = np.mean(values)
-            return mymean
-        else:
-            return None
+    def compute_mode(self, key):
+        """
+        Compute the mode of the values associated with a specific key across all entities.
 
+        Parameters:
+        - key (str): The key for which to compute the mode.
 
-    #def compute_basic_statistics(self, data):
-    #    mymean = np.mean(data)
-    #    mymedian = np.median(data)
-    #    mysd = np.std(data)
-    #    mymode = mode(data)
-    #    mymin = min(data)
-    #    mymax = max(data)
-    #    mycount = len(data)
+        Returns:
+        - float or None: The mode of the values associated with the key, or None if no values are found.
+        """
+        values = self._get_values_for_key(key)
+        return mode(values).mode[0] if values else None
+
+    def compute_median(self, key):
+        """
+        Compute the median of the values associated with a specific key across all entities.
+
+        Parameters:
+        - key (str): The key for which to compute the median.
+
+        Returns:
+        - float or None: The median of the values associated with the key, or None if no values are found.
+        """
+        values = self._get_values_for_key(key)
+        return np.median(values) if values else None
+
+    def compute_min(self, key):
+        """
+        Compute the minimum of the values associated with a specific key across all entities.
+
+        Parameters:
+        - key (str): The key for which to compute the minimum.
+
+        Returns:
+        - float or None: The minimum of the values associated with the key, or None if no values are found.
+        """
+        values = self._get_values_for_key(key)
+        return min(values) if values else None
+
+    def compute_max(self, key):
+        """
+        Compute the maximum of the values associated with a specific key across all entities.
+
+        Parameters:
+        - key (str): The key for which to compute the maximum.
+
+        Returns:
+        - float or None: The maximum of the values associated with the key, or None if no values are found.
+        """
+        values = self._get_values_for_key(key)
+        return max(values) if values else None
+
+    def compute_count(self, key):
+        """
+        Compute the count of the values associated with a specific key across all entities.
+
+        Parameters:
+        - key (str): The key for which to compute the count.
+
+        Returns:
+        - int or None: The count of the values associated with the key, or None if no values are found.
+        """
+        values = self._get_values_for_key(key)
+        return len(values) if values else None
+
+    def _get_values_for_key(self, key):
+        """
+        Get the values associated with a specific key across all entities.
+
+        Parameters:
+        - key (str): The key for which to retrieve the values.
+
+        Returns:
+        - list: List of values associated with the key.
+        """
+        values = [entity.field_value_pairs.get(key, None) for entity in self.items]
+        return [value for value in values if value is not None]
