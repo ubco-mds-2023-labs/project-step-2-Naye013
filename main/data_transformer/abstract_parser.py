@@ -5,7 +5,7 @@ class Parser():
         self.config = config
         self.__parsed_expression_collection__ =[]
     
-    def Parse(self):
+    def parse(self):
         pass
     
     def get_computable_fields(self):
@@ -28,13 +28,14 @@ class Parser():
     
     def evaluate_expression(self,first_term, second_term, alias, operator):
         '''NOTE: Printing as of now.As Entity.py is not ready'''
+        first_term, second_term = self.__validate_and_convert_operand__(first_term, second_term)
         if "+" == operator:
             print(alias, " : ", first_term+second_term)
-        if "-" == operator:
+        elif "-" == operator:
             print(alias, " : ", first_term-second_term)
-        if "*" == operator:
+        elif "*" == operator:
             print(alias, " : ", first_term*second_term)
-        if "/" == operator:
+        elif "/" == operator:
             print(alias, " : ", first_term/second_term)
                 
     def __parse_expression__(self,dynamic_splitter, field):
@@ -46,4 +47,10 @@ class Parser():
         expression_collection.append(function)
         self.__parsed_expression_collection__.append(expression_collection)  
         
-    
+    def __validate_and_convert_operand__(self, first_term, second_term):
+        try:
+            first_term = int(first_term)
+            second_term = int(second_term)
+            return first_term, second_term
+        except:
+            print("PARSER: The operands are not numeric")
