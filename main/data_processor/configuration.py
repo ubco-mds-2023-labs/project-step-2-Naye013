@@ -1,71 +1,60 @@
 import os
 import json
-import csv
 import xml.etree.ElementTree as ET
+import csv
 
 class Config:
-    """
-    Config class for handling configuration read and write operations.
+    def __init__(self, path_file, data_type, entity_collection, base_fields, computable_fields):
+        self.path_file = path_file
+        self.data_type = data_type
+        self.entity_collection = entity_collection
+        self.base_fields = base_fields
+        self.computable_fields = computable_fields
 
-    Attributes:
-    - file_path (str): The path to the configuration file.
-    - config (dict): The configuration data.
-
-    Methods:
-    - is_valid_config(): Check if a valid configuration is present.
-    - is_valid_path(): Check if the file path has a valid format.
-    - read_config(): Read configuration from the file.
-    - write_config(file_path=None): Write configuration to the file.
-    """
-
-    def __init__(self, file_path):
-        """
-        Initialize the Config object.
-
-        Parameters:
-        - file_path (str): The path to the configuration file.
-        """
-        # Check if the provided file path has a valid format
-        if not self.is_valid_path(file_path):
-            raise ValueError(f"Invalid file path: {file_path}. Please provide an absolute or relative file path with a valid format.")
-        
-        self.file_path = file_path
-        self.config = None
-
-    def is_valid_path(self, path):
-        """
-        Check if the provided file path has a valid format.
-
-        Parameters:
-        - path (str): The file path to be validated.
-
-        Returns:
-        - bool: True if the path has a valid format, False otherwise.
-        """
-        # Check if the path is an absolute or relative file path
-        if not os.path.isabs(path) and not os.path.relpath(path):
-            print(f"Invalid file path: {path}. Please provide an absolute or relative file path.")
+    def is_valid_config(self):
+        # Check if the file path exists
+        if not os.path.exists(self.path_file):
+            print(f"Error: File '{self.path_file}' does not exist.")
             return False
 
-        if not any(path.endswith(fmt) for fmt in self.SUPPORTED_FORMATS):
-            print(f"Unsupported file format: {path}")
+        # Extract the file extension
+        _, file_extension = os.path.splitext(self.path_file)
+
+        # Check if the file extension corresponds to a valid data type
+        valid_extensions = {'.json': 'JSON', '.xml': 'XML', '.csv': 'CSV'}
+        if file_extension.lower() not in valid_extensions:
+            print(f"Error: Invalid file type for '{self.path_file}'. Supported types are JSON, XML, and CSV.")
+            return False
+
+        # Check if the specified data type matches the detected file extension
+        if self.data_type != valid_extensions[file_extension.lower()]:
+            print(f"Error: Data type '{self.data_type}' does not match the file extension for '{self.path_file}'.")
             return False
 
         return True
 
     def read_config(self):
-        """
-        Read configuration from the file.
+        if not self.is_valid_config():
+            return "Configuration not valid"  # If configuration is not valid return a message
 
-        Returns:
-        - dict or None: The configuration data if read successfully, None otherwise.
-        """
-    
+        config_data = {}
 
-    def write_config(self, file_path=None):
-        """
-        Write configuration to the file.
+        if self.data_type == 'JSON':
+            with open(self.path_file, 'r') as json_file:
+                config_data = json.load(json_file)
 
-        Parameters:
-        - file_path
-        """
+        elif self.data_type == 'XML':
+            tree = ET.parse(self.path_file)
+            root = tree.getroot()
+            config_data['entity_collection'] = self.entity_collection
+            config_data['base_fields'] = [field.text for field in root.findall('.//base_fields/field')]
+            config_data['computable_fields'] = [field.text for field in root.findall('.//computable_fields/field')]
+
+        elif self.data_type == 'CSV':
+            with open(self.path_file, 'r') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                config_data['entity_collection'] = self.entity_collection
+                config_data['base_fields'] = csv_reader.fieldnames
+                config_data['computable_fields'] = [field for field in config_data['base_fields'] if field not in self.base_fields]
+
+        return config_data
