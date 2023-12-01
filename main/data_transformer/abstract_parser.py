@@ -26,17 +26,21 @@ class Parser():
     def get_parsed_expression(self):
         return self.__parsed_expression_collection__
     
-    def evaluate_expression(self,first_term, second_term, alias, operator):
+    def evaluate_expression(self,first_term, second_term, alias, operator, entity_obj):
         '''NOTE: Printing as of now.As Entity.py is not ready'''
         first_term, second_term = self.__validate_and_convert_operand__(first_term, second_term)
         if "+" == operator:
-            print(alias, " : ", first_term+second_term)
+            entity_obj.add(alias,first_term+second_term)
+            # print(alias, " : ", first_term+second_term)
         elif "-" == operator:
-            print(alias, " : ", first_term-second_term)
+            entity_obj.add(alias, first_term - second_term)
+            # print(alias, " : ", first_term-second_term)
         elif "*" == operator:
-            print(alias, " : ", first_term*second_term)
+            entity_obj.add(alias, first_term * second_term)
+            # print(alias, " : ", first_term*second_term)
         elif "/" == operator:
-            print(alias, " : ", first_term/second_term)
+            entity_obj.add(alias, first_term / second_term)
+            # print(alias, " : ", first_term/second_term)
                 
     def __parse_expression__(self,dynamic_splitter, field):
         pattern = r'\s*(?:[{}\s]|as)\s*'.format(dynamic_splitter)
