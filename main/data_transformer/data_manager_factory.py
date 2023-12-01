@@ -1,5 +1,7 @@
 from data_transformer.json_parser import JsonParser
 from data_transformer.xml_parser import XmlParser
+from data_transformer.csv_parser import CsvParser
+
 class DataManagerFactory:
     """ Helps to call respective  parser depending on data type of input content
     Process:  DataManagerFactory gets  data_type from config and check against the types of registered parsers.
@@ -21,12 +23,13 @@ class DataManagerFactory:
         """ Helps to register the parsers"""
         self.parsers.append(JsonParser)
         self.parsers.append(XmlParser)
+        self.parsers.append(CsvParser)
 
     def call_parser(self):
         """ Responsible for calling the respective parser by analysing the type of each registered parsers against config
         If the returned data is empty, throws error
-        If not, then calls Performance Summarizer """
-
+        If not, then calls Performance Summarizer
+        """
         try:
             for parser in self.parsers:
                 if parser.type == self.config.data_type:
