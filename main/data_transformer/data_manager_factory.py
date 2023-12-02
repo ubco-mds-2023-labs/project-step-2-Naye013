@@ -37,7 +37,7 @@ class DataManagerFactory:
                     entityCollection = respective_parser.parse()
                     if self.__is_empty__(entityCollection):
                         raise Exception("DATA MANAGER FACTORY: Data is empty in path: {}", format(self.config.path))
-                    # NOTE : ADD SUMMARIZER ONCE READY
+                    return entityCollection
         except Exception as e:
             print(e)
 

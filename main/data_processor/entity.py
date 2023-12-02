@@ -56,6 +56,7 @@ class EntityCollection:
         - items (list): List of Entity instances (optional).
         """
         self.items = items
+        self.fields = []
 
     def add(self, entity_id: str, field_values: dict):
         """
@@ -108,7 +109,9 @@ class EntityCollection:
         - float or None: The mode of the values associated with the key, or None if no values are found.
         """
         values = self._get_values_for_key(key)
-        return mode(values).mode[0] if values else None
+        mode_values = mode(values).mode
+        mode_value = mode_values if mode_values is not list else mode_values[0]
+        return mode_value if values else None
 
     def compute_median(self, key):
         """
