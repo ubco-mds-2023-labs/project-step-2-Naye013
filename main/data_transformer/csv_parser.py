@@ -28,8 +28,15 @@ class CsvParser(Parser):
 
          :return(EntityCollection): Helps to return Entity Collection
          """
-
-        # To be filled
+        data = self.__validate__()
+        fields = self.get_computable_fields()
+        parsed_expressions = self.get_parsed_expression()
+        self.entityCollection.fields = list(fields) + [expression[3] for expression in self.get_parsed_expression()]
+        for row in data:
+            entity_object = self.entityCollection.add_entity(row[self.config.base_field])
+            self.__handle_normal_fields__(row, fields, entity_object)
+            self.__handle_expression_fields__(row, parsed_expressions, entity_object)
+        return self.entityCollection
 
     def __handle_normal_fields__(self, row, fields, entity_object):
         """

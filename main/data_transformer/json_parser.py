@@ -34,6 +34,7 @@ class JsonParser(Parser):
             entities = data[self.config.entity_collection]
             fields = self.get_computable_fields()
             parsed_expressions = self.get_parsed_expression()
+            self.entityCollection.fields = list(fields) + [expression[3] for expression in self.get_parsed_expression()]
             for entity in entities:
                 entity_object = self.entityCollection.add_entity(entity.get(self.config.base_field))
                 self.__handle_normal_fields__(entity, fields, entity_object)

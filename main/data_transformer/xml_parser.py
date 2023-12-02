@@ -33,6 +33,7 @@ class XmlParser(Parser):
         entities = root.findall(self.config.entity_collection)
         fields = self.get_computable_fields()
         parsed_expressions = self.get_parsed_expression()
+        self.entityCollection.fields = list(fields) + [expression[3] for expression in self.get_parsed_expression()]
         for entity in entities:
             entity_object = self.entityCollection.add_entity(entity.find(self.config.base_field).text)
             self.__handle_normal_fields__(entity, fields, entity_object)
@@ -78,7 +79,7 @@ class XmlParser(Parser):
                 raise ValueError("XML PARSER: Configuration entity_Collection doesn't match")
             return data
         except:
-            print("XML PARSER: Invalid Json")
+            print("XML PARSER: Invalid Xml")
 
     def __load_data__(self):
         """

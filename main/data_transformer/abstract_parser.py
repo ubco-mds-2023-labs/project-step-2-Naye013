@@ -45,7 +45,7 @@ class Parser:
         - Accepts only 2 operands in expression
         """
         fields = set()
-        for field in self.config.Computable_Fields:
+        for field in self.config.computable_fields:
             if "+" in field:
                 self.__parse_expression__("+", field)
             elif "-" in field:
