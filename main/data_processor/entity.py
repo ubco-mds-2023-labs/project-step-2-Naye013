@@ -2,9 +2,10 @@ import numpy as np
 from scipy.stats import mode
 
 class Entity:
-    def __init__(self, entity_id, field_value_pairs):
+    def __init__(self, entity_id, field_value_pairs = { }):
         """
         Initialize an Entity instance.
+        Giving a default value as dictionary as sometimes the process add entity field_value_pairs later
 
         Parameters:
         - entity_id (str): The ID or label of the entity.
@@ -22,6 +23,7 @@ class Entity:
 
         Returns:
         - dict: Validated key-value pairs.
+        NOTE:Converting entity_identifier to
         """
         validated_pairs = {}
         for field, value in field_value_pairs.items():
@@ -33,17 +35,30 @@ class Entity:
             validated_pairs[field] = validated_value
         return validated_pairs
 
+    def add(self, field, value):
+        """
+        this helps to add field value pairs in loop
+        when the entity is known
+
+        Parameters:
+        - field (string):  represents the attribute of the entity.Eg: - Student's Subject - English
+        - field (int):  represents the value of the entity.Eg: - Student's score - 90
+        """
+        validated_field_value = self.validate_and_convert({field: value})
+        self.field_value_pairs.update(validated_field_value)
+
 class EntityCollection:
-    def __init__(self, items=None):
+    def __init__(self, items=[]):
         """
         Initialize an EntityCollection instance.
 
         Parameters:
         - items (list): List of Entity instances (optional).
         """
-        self.items = items or []
+        self.items = items
+        self.fields = []
 
-    def add(self, entity_id, field_values):
+    def add(self, entity_id: str, field_values: dict):
         """
         Add an entity to the collection.
 
@@ -53,6 +68,22 @@ class EntityCollection:
         """
         new_entity = Entity(entity_id, field_values)
         self.items.append(new_entity)
+
+    def add_entity(self, value):
+        """
+        This method helps to add an entity to the collection.
+        Also, this helps to create a dictionary on behalf of user
+        Moreover, this helps when we need to add attribute-value pair in loops
+
+        Parameters:
+        - entity_id (str): The ID or label of the entity. Eg:- A student's name
+
+        Returns:
+        - Entity
+        """
+        new_entity = Entity(value, {})
+        self.items.append(new_entity)
+        return new_entity
 
     def compute_mean(self, key):
         """
@@ -78,7 +109,9 @@ class EntityCollection:
         - float or None: The mode of the values associated with the key, or None if no values are found.
         """
         values = self._get_values_for_key(key)
-        return mode(values).mode[0] if values else None
+        mode_values = mode(values).mode
+        mode_value = mode_values if mode_values is not list else mode_values[0]
+        return mode_value if values else None
 
     def compute_median(self, key):
         """
