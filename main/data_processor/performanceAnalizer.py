@@ -1,3 +1,4 @@
+from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from tabulate import tabulate
@@ -55,7 +56,7 @@ class Performance_Analyzer:
 
         return chart_x_axis, chart_y_axis
 
-    def __generate_histogram__(self, ax, x, y):
+    def __generate_histogram__(self, x, y,title, xlabel,ylabel,ax=[0,0]):
         """
         Generates a histogram plot.
 
@@ -67,12 +68,13 @@ class Performance_Analyzer:
             y: list
                 Y-axis data.
         """
-        ax.hist(y, bins=10, edgecolor='black')
-        ax.set_title(title)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
+        #ax.hist(y, bins=10, edgecolor='black')
+        plt.hist(y, bins=10)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
 
-    def __generate_barplot__(self, ax, x, y):
+    def __generate_barplot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a bar plot.
 
@@ -84,9 +86,10 @@ class Performance_Analyzer:
             y: list
                 Y-axis data.
         """
-        ax.bar(x, y)
+        plt.bar(x, y)
+        plt.show()
 
-    def __generate_line_chart__(self, ax, x, y):
+    def __generate_line_chart__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a line chart.
 
@@ -98,9 +101,10 @@ class Performance_Analyzer:
             y: list
                 Y-axis data.
         """
-        ax.plot(x, y, marker='o')
+        plt.plot(x, y, marker='o')
+        plt.show()
 
-    def __generate_boxplot__(self, ax, x, y):
+    def __generate_boxplot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a box plot.
 
@@ -112,9 +116,10 @@ class Performance_Analyzer:
             y: list
                 Y-axis data.
         """
-        ax.boxplot(y, vert=False)
+        plt.boxplot(y, vert=False)
+        plt.show()
 
-    def __generate_scatter_plot__(self, ax, x, y):
+    def __generate_scatter_plot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a scatter plot.
 
@@ -126,9 +131,45 @@ class Performance_Analyzer:
             y: list
                 Y-axis data.
         """
-        ax.scatter(x, y)
+        plt.scatter(x, y)
+        plt.show()
 
-    def summarize_and_export(self, entity_collection, pdf_filename):
+    def summarize(self, entity_collection):
+        """
+        Helps to provide summary
+        :param entity_collection: Entity Collection Object
+        :return:None
+        """
+        LINE = "-----------------------------"
+        xlabel = self.config.base_field
+        for field in entity_collection.fields:
+            ylabel = field
+            print(LINE)
+            print("Summary on {}".format(field))
+            print(LINE)
+            print("MEAN  : ", entity_collection.compute_mean(field))
+            print("MODE  : ", entity_collection.compute_mode(field))
+            print("MEDIAN: ", entity_collection.compute_median(field))
+            print("MIN   : ", entity_collection.compute_min(field))
+            print("MAX   : ", entity_collection.compute_max(field))
+            print("COUNT : ", entity_collection.compute_count(field))
+            print(LINE)
+            print("VISUALIZATION")
+            print(LINE)
+
+            x, y = self.__prepare_axis_components__(entity_collection, field)
+
+            self.__generate_line_chart__(x, y, "line chart", xlabel, ylabel)
+            self.__generate_scatter_plot__(x, y, "scatter plot", xlabel, ylabel)
+            self.__generate_boxplot__(x, y, "box plot", xlabel, ylabel)
+            #self.__generate_histogram__(x, y, "Histogram", xlabel, ylabel)
+            print(LINE)
+
+
+            '''
+    def summarize_and_export(self, entity_collection):
+        xlabel = self.config.base_field
+
         """
         Summarizes data, display visualizations and summary table in the console and exports to a PDF file.
 
@@ -138,14 +179,28 @@ class Performance_Analyzer:
             pdf_filename: str
                 The name of the PDF file to save the visualizations and summary table.
         """
+        pdf_filename = "export.pdf" # datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".pdf"
         with PdfPages(pdf_filename) as pdf:
             LINE = "-----------------------------"
             for field in entity_collection.fields:
+                xlabel = self.config.base_field
+                ylabel = field
                 # Create a 2x3 subplot grid
                 fig, axs = plt.subplots(2, 3, figsize=(15, 10))
 
                 # Display summary information in a table
-                summary_data = {
+                LINE = "-----------------------------"
+                print(LINE)
+                print("Summary on {}".format(field))
+                print(LINE)
+                print("MEAN  : ", entity_collection.compute_mean(field))
+                print("MODE  : ", entity_collection.compute_mode(field))
+                print("MEDIAN: ", entity_collection.compute_median(field))
+                print("MIN   : ", entity_collection.compute_min(field))
+                print("MAX   : ", entity_collection.compute_max(field))
+                print("COUNT : ", entity_collection.compute_count(field))
+                print(LINE)
+                """summary_data = {
                     "COUNT": entity_collection.compute_count(field),
                     "MEAN": entity_collection.compute_mean(field),
                     "MODE": entity_collection.compute_mode(field),
@@ -158,35 +213,35 @@ class Performance_Analyzer:
                 axs[0, 0].table(cellText=table_data,
                                 cellLoc='center',
                                 loc='center',
-                                bbox=[0, 0, 1, 1])
+                                bbox=[0, 0, 1, 1])1"""
 
                 # Prepare data for plots
                 x, y = self.__prepare_axis_components__(entity_collection, field)
 
                 # Display histogram
-                self.__generate_histogram__(axs[0, 1], x, y, f'Histogram of {field}')
+                self.__generate_histogram__(axs[0, 1], x, y, f'Histogram of {field}', xlabel, ylabel)
 
                 # Display barplot
-                self.__generate_barplot__(axs[0, 2], x, y, f'Bar Plot of {field}')
+                self.__generate_barplot__(axs[0, 2], x, y, f'Bar Plot of {field}', xlabel, ylabel)
 
                 # Display boxplot
-                self.__generate_boxplot__(axs[1, 0], x, y, f'Box Plot of {field}')
+                self.__generate_boxplot__(axs[1, 0], x, y, f'Box Plot of {field}', xlabel, ylabel)
 
                 # Display line chart
-                self.__generate_line_chart__(axs[1, 1], x, y, f'Line Chart of {field}')
+                self.__generate_line_chart__(axs[1, 1], x, y, f'Line Chart of {field}', xlabel, ylabel)
 
                 # Display scatter plot
-                self.__generate_scatter_plot__(axs[1, 2], x, y, f'Scatter Plot of {field}')
+                self.__generate_scatter_plot__(axs[1, 2], x, y, f'Scatter Plot of {field}', xlabel, ylabel)
 
                 plt.suptitle(f"Summary and Visualizations for {field}", fontsize=16)
                 plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust layout to prevent overlap
                 plt.show()
 
                 # Save the current figure to the PDF
-                pdf.savefig()
+            pdf.savefig()
 
                 # Display the complete layout
-                plt.show()
-                plt.close()
+            plt.show()
+            plt.close()
 
-                print(f"Plots and table for {field} saved to {pdf_filename}")
+            print(f"Plots and table for {field} saved to {pdf_filename}")'''
