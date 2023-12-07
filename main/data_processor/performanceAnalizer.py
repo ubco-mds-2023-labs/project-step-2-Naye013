@@ -58,9 +58,10 @@ class Performance_Analyzer:
 
         return chart_x_axis, chart_y_axis
 
-
+      
 
     def __generate_barplot__(self, x, y, ylabel, axs):
+
         """
         Generates a bar plot.
 
@@ -74,10 +75,10 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the barplot will be plotted.
         """
-        axs[1, 0].bar(x, y)
-        axs[1, 0].set_title(f'{ylabel} Bar Chart'.upper())
+        plt.bar(x, y)
+        plt.show()
 
-    def __generate_line_chart__(self, x, y, ylabel, axs):
+    def __generate_line_chart__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a line chart.
 
@@ -91,10 +92,10 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the line chart will be plotted.
         """
-        axs[2, 0].plot(x, y, marker='o')
-        axs[2, 0].set_title(f'{ylabel} Line Chart'.upper())
+        plt.plot(x, y, marker='o')
+        plt.show()
 
-    def __generate_boxplot__(self, y, ylabel, axs):
+    def __generate_boxplot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a box plot.
 
@@ -106,11 +107,10 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the boxplot will be plotted.
         """
-        axs[2, 1].boxplot(y, vert=False)
-        axs[2, 1].set_title(f'{ylabel} Boxplot'.upper())
-      #  axs[2, 1].set_yticks([1], [f'{ylabel} values'])
+        plt.boxplot(y, vert=False)
+        plt.show()
 
-    def __generate_scatter_plot__(self, x, y, ylabel, axs):
+    def __generate_scatter_plot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
         Generates a scatter plot.
 
@@ -124,10 +124,10 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the scatter plot will be plotted.
         """
-        axs[1, 1].scatter(x, y)
-        axs[1, 1].set_title(f'{ylabel} Scatter Plot'.upper())
+        plt.scatter(x, y)
+        plt.show()
 
-    def __generate_statistical_table__(self,entity_collection,field, axs):
+    def summarize(self, entity_collection):
         """
         Generates a summary table fill with the statistical metrics for every field (column).
 

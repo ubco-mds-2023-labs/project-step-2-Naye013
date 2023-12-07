@@ -20,7 +20,7 @@ def get_user_option():
     """
     print("OPTIONS: ")
     print("1. Summary")
-    print("2. Export Pdf")
+    # print("2. Export Pdf")
     print(LINE)
     return input("Choose any one of the below options: ")
 
@@ -46,7 +46,6 @@ def get_config(config):
     config.base_field = input("Please enter base_field: ")
     config.path = input("Please enter path: ")
     config.computable_fields = input("Please enter computable_fields: ").split(',')
-    config.is_valid()
     config.write_config()
 
 def handle_display(config):
@@ -61,18 +60,24 @@ def handle_display(config):
     entityCollection = factory.call_parser()
     analyzer = Performance_Analyzer(config)
     if user_input == "1":
-        analyzer.summarize(entityCollection)
+        analyzer.display(entityCollection)
     else:
         analyzer.export(entityCollection)
 
-# main
-config = Config()
-print_title()
-config.read_config()
-if config.is_valid():
-    handle_display(config)
-else:
-    get_config(config)
-    print(LINE)
-    print(LINE)
-    handle_display(config)
+
+def run():
+    """
+    This is the initial method which co-ordinates all the other method
+    to provide user interaction
+    :return: None
+    """
+    config = Config()
+    print_title()
+    config.read_config()
+    if config.is_valid_config():
+        handle_display(config)
+    else:
+        get_config(config)
+        print(LINE)
+        print(LINE)
+        handle_display(config)

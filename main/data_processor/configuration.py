@@ -4,6 +4,7 @@ import difflib
 
 class Config:
     def __init__(self):
+
         """
         Initializes a Config instance.
 
@@ -19,7 +20,7 @@ class Config:
         self.entity_collection = ''
         self.base_field = ''
         self.computable_fields = []
-        self.path = os.path.join(os.getcwd(), 'config.json')
+        self.path = ""
         self.config_data = self.read_config()
 
     def is_valid_config(self):
@@ -29,9 +30,10 @@ class Config:
         Returns:
             bool: True if the configuration is valid, False otherwise.
         """
+        config_path = os.path.join(os.getcwd(), "config.json")
         # Check if the file path exists
-        if not os.path.exists(self.path):
-            print(f"Error: File '{self.path}' does not exist.")
+        if not os.path.exists(config_path):
+            print(f"Error: File '{config_path}' does not exist.")
             return False
 
         # Extract the file extension
@@ -58,12 +60,10 @@ class Config:
         Returns:
             dict: The configuration data.
         """
-        if not self.is_valid_config():
-            return "Configuration not valid"  # If configuration is not valid return a message
-
         # Read the configuration from the existing file
         try:
-            with open(self.path, 'r') as json_file:
+            config_path = os.path.join(os.getcwd(), "config.json")
+            with open(config_path, 'r') as json_file:
                 config_data = json.load(json_file)
 
             # Initialize attributes based on the configuration data
@@ -73,6 +73,8 @@ class Config:
             self.base_field = config_data.get('base_field', '')
             self.computable_fields = config_data.get('computable_fields', [])
 
+            if not self.is_valid_config():
+                return "Configuration not valid"  # If configuration is not valid return a message
             return config_data
         
         # Prints an error message indicating a failure to read the configuration from the specified file,
@@ -92,3 +94,20 @@ class Config:
             Any: The value of the specified property.
         """
         return getattr(self, property_name, None)
+
+    def write_config(self):
+        """
+        Helps to write a config and store it in current directory
+        :return: none
+        """
+        config_val = {
+            "data_type": self.data_type,
+            "entity_collection": self.entity_collection,
+            "base_field": self.base_field,
+            "computable_fields": self.computable_fields,
+            "path": self.path
+        }
+        config_path = os.path.join(os.getcwd(), "config.json")
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, 'w') as json_file:
+            json.dump(config_val, json_file, indent=4)
