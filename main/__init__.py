@@ -20,7 +20,7 @@ def get_user_option():
     """
     print("OPTIONS: ")
     print("1. Summary")
-    # print("2. Export Pdf")
+    print("2. Export Pdf")
     print(LINE)
     return input("Choose any one of the below options: ")
 
