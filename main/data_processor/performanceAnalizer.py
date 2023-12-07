@@ -1,5 +1,8 @@
+from datetime import datetime
 import matplotlib.pyplot as plt
+import pandas.core.frame
 from matplotlib.backends.backend_pdf import PdfPages
+from array import array
 from tabulate import tabulate
 import pandas as pd
 import numpy as np
@@ -32,7 +35,7 @@ class Performance_Analyzer:
         
     def __prepare_axis_components__(self, entity_collection, field):
         """
-        Prepares data for plotting by extracting X and Y axis components.
+        Prepares data for plotting by extracting x and y axis components.
 
         Parameters:
             entity_collection: EntityCollection
@@ -55,138 +58,146 @@ class Performance_Analyzer:
 
         return chart_x_axis, chart_y_axis
 
-    def __generate_histogram__(self, ax, x, y):
-        """
-        Generates a histogram plot.
 
-        Parameters:
-            ax: AxesSubplot
-                The subplot where the histogram will be plotted.
-            x: list
-                X-axis data.
-            y: list
-                Y-axis data.
-        """
-        ax.hist(y, bins=10, edgecolor='black')
-        ax.set_title(title)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
 
-    def __generate_barplot__(self, ax, x, y):
+    def __generate_barplot__(self, x, y, ylabel, axs):
         """
         Generates a bar plot.
 
         Parameters:
-            ax: AxesSubplot
-                The subplot where the histogram will be plotted.
             x: list
                 X-axis data.
             y: list
                 Y-axis data.
+            ylabel: list
+                Label from Y-axis data.
+            axs: AxesSubplot
+                The subplot where the barplot will be plotted.
         """
-        ax.bar(x, y)
+        axs[1, 0].bar(x, y)
+        axs[1, 0].set_title(f'{ylabel} Bar Chart'.upper())
 
-    def __generate_line_chart__(self, ax, x, y):
+    def __generate_line_chart__(self, x, y, ylabel, axs):
         """
         Generates a line chart.
 
         Parameters:
-            ax: AxesSubplot
-                The subplot where the histogram will be plotted.
             x: list
                 X-axis data.
             y: list
                 Y-axis data.
+            ylabel: list
+                Label from Y-axis data.
+            axs: AxesSubplot
+                The subplot where the line chart will be plotted.
         """
-        ax.plot(x, y, marker='o')
+        axs[2, 0].plot(x, y, marker='o')
+        axs[2, 0].set_title(f'{ylabel} Line Chart'.upper())
 
-    def __generate_boxplot__(self, ax, x, y):
+    def __generate_boxplot__(self, y, ylabel, axs):
         """
         Generates a box plot.
 
         Parameters:
-            ax: AxesSubplot
-                The subplot where the histogram will be plotted.
-            x: list
-                X-axis data.
             y: list
                 Y-axis data.
+            ylabel: list
+                Label from Y-axis data.
+            axs: AxesSubplot
+                The subplot where the boxplot will be plotted.
         """
-        ax.boxplot(y, vert=False)
+        axs[2, 1].boxplot(y, vert=False)
+        axs[2, 1].set_title(f'{ylabel} Boxplot'.upper())
+      #  axs[2, 1].set_yticks([1], [f'{ylabel} values'])
 
-    def __generate_scatter_plot__(self, ax, x, y):
+    def __generate_scatter_plot__(self, x, y, ylabel, axs):
         """
         Generates a scatter plot.
 
         Parameters:
-            ax: AxesSubplot
-                The subplot where the histogram will be plotted.
             x: list
                 X-axis data.
             y: list
                 Y-axis data.
+            ylabel: list
+                Label from Y-axis data.
+            axs: AxesSubplot
+                The subplot where the scatter plot will be plotted.
         """
-        ax.scatter(x, y)
+        axs[1, 1].scatter(x, y)
+        axs[1, 1].set_title(f'{ylabel} Scatter Plot'.upper())
 
-    def summarize_and_export(self, entity_collection, pdf_filename):
+    def __generate_statistical_table__(self,entity_collection,field, axs):
         """
-        Summarizes data, display visualizations and summary table in the console and exports to a PDF file.
+        Generates a summary table fill with the statistical metrics for every field (column).
 
         Parameters:
-            entity_collection: EntityCollection
-                A collection of entities with data to be analyzed.
-            pdf_filename: str
-                The name of the PDF file to save the visualizations and summary table.
+            entity_collection: 
+                Object of the class entity.
+            field:
+                The field that will be used to compute the statistical metrics.
+            axs: AxesSubplot
+                The subplot where the summary table will be plotted.
         """
+        axs[0, 0].axis('off')  # Hide axes for the table
+        metrics_labels = ['MEAN', 'MODE', 'MEDIAN', 'MIN', 'MAX', 'COUNT']
+        summary_data = [entity_collection.compute_mean(field), entity_collection.compute_mode(field),
+                        entity_collection.compute_median(field), entity_collection.compute_min(field),
+                        entity_collection.compute_max(field), entity_collection.compute_count(field)]
+        summary_data = np.array([summary_data])
+        df = pd.DataFrame(summary_data, columns=metrics_labels)
+        summary_table = axs[0, 0].table(cellText=df.values,
+                                          colLabels=metrics_labels,
+                                          cellLoc='center',
+                                          loc='center',
+                                          cellColours=[['#F0F0F0'] * len(metrics_labels)],
+                                          colWidths=[0.2] * len(metrics_labels),
+                                          bbox=[0, 0, 1, 1])
+
+    def display(self, entity_collection):
+        """
+        Method that display the summary table and plots for the entity collection.
+
+        Parameters:
+            entity_collection: 
+                Object of the class entity.
+        """
+        fields = entity_collection.fields
+        for column in fields:
+            X,Y = self.__prepare_axis_components__(entity_collection,column)
+            fig, axs = plt.subplots(3, 2, figsize=(14, 12))
+            fig.suptitle(f'{column} Analysis'.upper(), fontsize=16)
+            self.__generate_statistical_table__(entity_collection,column,axs)
+            axs[0, 1].axis('off')
+            self.__generate_barplot__(X, Y, column, axs)
+            self.__generate_scatter_plot__(X, Y, column, axs)
+            self.__generate_line_chart__(X, Y, column, axs)
+            self.__generate_boxplot__(Y, column, axs)
+            plt.tight_layout()
+            plt.show()
+            plt.close()
+
+    def export(self, entity_collection):
+        """
+        Method to export the summary table and plots for the entity collection in a PDF file.
+
+        Parameters:
+            entity_collection: 
+                Object of the class entity.
+        """
+        fields = entity_collection.fields
+        pdf_filename = "Summary.pdf"
         with PdfPages(pdf_filename) as pdf:
-            LINE = "-----------------------------"
-            for field in entity_collection.fields:
-                # Create a 2x3 subplot grid
-                fig, axs = plt.subplots(2, 3, figsize=(15, 10))
-
-                # Display summary information in a table
-                summary_data = {
-                    "COUNT": entity_collection.compute_count(field),
-                    "MEAN": entity_collection.compute_mean(field),
-                    "MODE": entity_collection.compute_mode(field),
-                    "MEDIAN": entity_collection.compute_median(field),
-                    "MIN": entity_collection.compute_min(field),
-                    "MAX": entity_collection.compute_max(field),
-                }
-                table_data = tabulate(summary_data.items(), headers=["Metric", "Value"])
-                axs[0, 0].axis('off')  # Hide axes for the table
-                axs[0, 0].table(cellText=table_data,
-                                cellLoc='center',
-                                loc='center',
-                                bbox=[0, 0, 1, 1])
-
-                # Prepare data for plots
-                x, y = self.__prepare_axis_components__(entity_collection, field)
-
-                # Display histogram
-                self.__generate_histogram__(axs[0, 1], x, y, f'Histogram of {field}')
-
-                # Display barplot
-                self.__generate_barplot__(axs[0, 2], x, y, f'Bar Plot of {field}')
-
-                # Display boxplot
-                self.__generate_boxplot__(axs[1, 0], x, y, f'Box Plot of {field}')
-
-                # Display line chart
-                self.__generate_line_chart__(axs[1, 1], x, y, f'Line Chart of {field}')
-
-                # Display scatter plot
-                self.__generate_scatter_plot__(axs[1, 2], x, y, f'Scatter Plot of {field}')
-
-                plt.suptitle(f"Summary and Visualizations for {field}", fontsize=16)
-                plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust layout to prevent overlap
-                plt.show()
-
-                # Save the current figure to the PDF
+            for column in fields:
+                X,Y = self.__prepare_axis_components__(entity_collection,column)
+                fig, axs = plt.subplots(3, 2, figsize=(14, 12))
+                fig.suptitle(f'{column} Analysis'.upper(), fontsize=16)
+                self.__generate_statistical_table__(entity_collection,column,axs)
+                axs[0, 1].axis('off')
+                self.__generate_barplot__(X, Y, column, axs)
+                self.__generate_scatter_plot__(X, Y, column, axs)
+                self.__generate_line_chart__(X, Y, column, axs)
+                self.__generate_boxplot__(Y, column, axs)
                 pdf.savefig()
-
-                # Display the complete layout
-                plt.show()
+                plt.tight_layout()
                 plt.close()
-
-                print(f"Plots and table for {field} saved to {pdf_filename}")
