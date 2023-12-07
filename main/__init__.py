@@ -31,7 +31,7 @@ def validate(user_input):
     :param user_input: user_input
     :return: None
     """
-    if user_input not in ['1']:  # ''' ['1', '2']:'''
+    if user_input not in ['1', '2']:
         raise ValueError("Please Enter valid options.")
 
 def get_config(config):
@@ -46,7 +46,6 @@ def get_config(config):
     config.base_field = input("Please enter base_field: ")
     config.path = input("Please enter path: ")
     config.computable_fields = input("Please enter computable_fields: ").split(',')
-    # config.is_valid_config()
     config.write_config()
 
 def handle_display(config):
@@ -61,9 +60,9 @@ def handle_display(config):
     entityCollection = factory.call_parser()
     analyzer = Performance_Analyzer(config)
     if user_input == "1":
-        analyzer.summarize(entityCollection)
-    # else:
-        # analyzer.export(entityCollection)
+        analyzer.display(entityCollection)
+    else:
+        analyzer.export(entityCollection)
 
 
 def run():
