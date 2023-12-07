@@ -12,12 +12,11 @@ class Performance_Analyzer:
     Performance_Analyzer class helps to provide summary on statistics metrics and visualize the charts.
     
     It generates the following visualizations and call basic metrics to display in console and export in a PDF file the following:
-    1. Histogram
-    2. Bar plot
-    3. Line chart
+    1. Bar plot
+    2. Line chart
+    3. Scatter  plot
     4. Box plot
-    5. Scatter plot
-    6. Metrics like mean, median, mode, count, max, min
+    5. Metrics like mean, median, mode, count, max, min
     
     Parameters:
         config: Configuration
@@ -57,11 +56,8 @@ class Performance_Analyzer:
                 chart_y_axis.append(0)
 
         return chart_x_axis, chart_y_axis
-
       
-
     def __generate_barplot__(self, x, y, ylabel, axs):
-
         """
         Generates a bar plot.
 
@@ -75,8 +71,8 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the barplot will be plotted.
         """
-        plt.bar(x, y)
-        plt.show()
+        axs[1, 0].bar(x, y)
+        axs[1, 0].set_title(f'{ylabel} Bar Chart'.upper())
 
     def __generate_line_chart__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
@@ -92,8 +88,8 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the line chart will be plotted.
         """
-        plt.plot(x, y, marker='o')
-        plt.show()
+        axs[2, 0].plot(x, y, marker='o')
+        axs[2, 0].set_title(f'{ylabel} Line Chart'.upper())
 
     def __generate_boxplot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
@@ -107,8 +103,8 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the boxplot will be plotted.
         """
-        plt.boxplot(y, vert=False)
-        plt.show()
+        axs[2, 1].boxplot(y, vert=False)
+        axs[2, 1].set_title(f'{ylabel} Boxplot'.upper())
 
     def __generate_scatter_plot__(self, x, y, title, xlabel, ylabel,ax=[0,0]):
         """
@@ -124,12 +120,12 @@ class Performance_Analyzer:
             axs: AxesSubplot
                 The subplot where the scatter plot will be plotted.
         """
-        plt.scatter(x, y)
-        plt.show()
+        axs[1, 1].scatter(x, y)
+        axs[1, 1].set_title(f'{ylabel} Scatter Plot'.upper())
 
-    def summarize(self, entity_collection):
+    def __generate_statistical_table__(self,entity_collection,field, axs):
         """
-        Generates a summary table fill with the statistical metrics for every field (column).
+        Generates a summary table filled with the statistical metrics for every field (column).
 
         Parameters:
             entity_collection: 
