@@ -127,5 +127,5 @@ class Parser:
             first_term = int(first_term)
             second_term = int(second_term)
             return first_term, second_term
-        except:
-            print("PARSER: The operands are not numeric")
+        except ValueError:
+            raise ValueError("PARSER: The operands are not numeric")
