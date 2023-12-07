@@ -74,7 +74,7 @@ class Performance_Analyzer:
         axs[1, 0].bar(x, y)
         axs[1, 0].set_title(f'{ylabel} Bar Chart'.upper())
 
-    def __generate_line_chart__(self, x, y, title, xlabel, ylabel,axs):
+    def __generate_line_chart__(self, x, y, ylabel, axs):
         """
         Generates a line chart.
 
@@ -106,7 +106,7 @@ class Performance_Analyzer:
         axs[2, 1].boxplot(y, vert=False)
         axs[2, 1].set_title(f'{ylabel} Boxplot'.upper())
 
-    def __generate_scatter_plot__(self, x, y, ylabel,axs):
+    def __generate_scatter_plot__(self, x, y, ylabel, axs):
         """
         Generates a scatter plot.
 
@@ -123,7 +123,7 @@ class Performance_Analyzer:
         axs[1, 1].scatter(x, y)
         axs[1, 1].set_title(f'{ylabel} Scatter Plot'.upper())
 
-    def __generate_statistical_table__(self,entity_collection,field, axs):
+    def __generate_statistical_table__(self, entity_collection, field, axs):
         """
         Generates a summary table filled with the statistical metrics for every field (column).
 
