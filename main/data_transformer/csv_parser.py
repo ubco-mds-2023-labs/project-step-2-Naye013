@@ -2,6 +2,7 @@ import os
 import csv
 from data_transformer.abstract_parser import Parser
 from data_processor.entity import EntityCollection as EC
+from data_transformer.custom_exception import EntityCollectionMismatch as EMC
 
 class CsvParser(Parser):
     """
@@ -74,17 +75,22 @@ class CsvParser(Parser):
         try:
             data = self.__load_data__()
             if len(data) == 0:
-                raise ValueError("CSV PARSER: Empty csv file")
+                raise EMC("CSV PARSER", self.config.path)
             return data
-        except Exception :
-            print("CSV PARSER: Invalid CSV")
+        except Exception:
+            raise Exception("CSV PARSER: Invalid CSV")
 
     def __load_data__(self):
         """
         Helps to load the file
         :return: data
         """
-        with open(self.config.path, 'r') as file:
-            csv_reader = csv.reader(file)
-            header = next(csv_reader, None)
-            return [dict(zip(header, row)) for row in csv_reader]
+        try:
+            with open(self.config.path, 'r') as file:
+                csv_reader = csv.reader(file)
+                header = next(csv_reader, None)
+                return [dict(zip(header, row)) for row in csv_reader]
+        except FileNotFoundError:
+            raise FileNotFoundError("CSV Parser: File not found in path {}".format(self.config.path))
+        except Exception as e:
+            raise Exception(e)

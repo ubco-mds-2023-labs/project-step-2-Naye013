@@ -2,6 +2,7 @@ import os
 import json
 from data_transformer.abstract_parser import Parser
 from data_processor.entity import EntityCollection as EC
+from data_transformer.custom_exception import EntityCollectionMismatch as EMC
 
 class JsonParser(Parser):
     """
@@ -77,16 +78,24 @@ class JsonParser(Parser):
         try:
             data = self.__load_data__()
             if self.config.entity_collection not in data:
-                raise ValueError("JSON PARSER: Configuration entity_Collection doesn't match")
+                raise EMC("JSON PARSER", self.config.path)
             return data
-        except:
-            print("JSON PARSER: Invalid Json")
+        except Exception:
+            raise Exception("JSON PARSER: Invalid Json")
 
     def __load_data__(self):
         """
         Helps to load the file
         :return: data
         """
-        with open(self.config.path, 'r') as file:
-            return json.load(file)
+        try:
+            with open(self.config.path, 'r') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError("JSON Parser: File not found in path {}".format(self.config.path))
+        except Exception as e:
+            raise Exception(e)
+
+
+
 
