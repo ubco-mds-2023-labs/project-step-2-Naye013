@@ -78,7 +78,14 @@ class Parser:
         :param entity_obj: (Entity) - Object of Entity
         :return: None
         """
-        first_term, second_term = self.__validate_and_convert_operand__(first_term, second_term)
+        try:
+            operands = self.__validate_and_convert_operand__(first_term, second_term)
+            if operands is None:
+                raise ValueError("Please check the data. The data should be number")
+            else:
+                first_term, second_term = operands
+        except ValueError as e:
+            raise ValueError(e)
         if "+" == operator:
             entity_obj.add(alias, first_term+second_term)
         elif "-" == operator:
