@@ -2,6 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 from data_transformer.abstract_parser import Parser
 from data_processor.entity import EntityCollection as EC
+from data_transformer.custom_exception import EntityCollectionMismatch as EMC
 
 class XmlParser(Parser):
     """
@@ -76,15 +77,20 @@ class XmlParser(Parser):
         try:
             data = self.__load_data__()
             if len(data.findall(self.config.entity_collection)) == 0:
-                raise ValueError("XML PARSER: Configuration entity_Collection doesn't match")
+                raise EMC("XML PARSER", self.config.path)
             return data
-        except:
-            print("XML PARSER: Invalid Xml")
+        except Exception:
+            raise Exception("XML PARSER: Invalid Xml")
 
     def __load_data__(self):
         """
         Helps to load the file
         :return: data
         """
-        tree = ET.parse(self.config.path)
-        return tree.getroot()
+        try:
+            tree = ET.parse(self.config.path)
+            return tree.getroot()
+        except FileNotFoundError:
+            raise FileNotFoundError("XML Parser: File not found in path {}".format(self.config.path))
+        except Exception as e:
+            raise Exception(e)

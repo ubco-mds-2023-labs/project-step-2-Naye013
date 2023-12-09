@@ -1,6 +1,7 @@
 from data_transformer.json_parser import JsonParser
 from data_transformer.xml_parser import XmlParser
 from data_transformer.csv_parser import CsvParser
+from data_transformer.custom_exception import EmptyData as ED
 
 class DataManagerFactory:
     """ Helps to call respective  parser depending on data type of input content
@@ -36,10 +37,10 @@ class DataManagerFactory:
                     respective_parser = parser(self.config)
                     entityCollection = respective_parser.parse()
                     if self.__is_empty__(entityCollection):
-                        raise Exception("DATA MANAGER FACTORY: Data is empty in path: {}", format(self.config.path))
+                        raise ED(self.config.path)
                     return entityCollection
         except Exception as e:
-            print(e)
+            raise Exception(e)
 
     def __is_empty__(self, entityCollection):
         """
